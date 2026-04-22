@@ -2,6 +2,13 @@
 
 > *Where premium coffee meets Business Intelligence.*
 
+| Landing Page | Product Telemetry |
+| :---: | :---: |
+| ![Landing Page](./images/ss1.png) | ![Product Card](./images/ss2.png) |
+| **BI Analytics Overview** | **Admin Data Control** |
+| ![BI Dashboard](./images/ss3.png) | ![BI Dashboard Export](./images/ss4.png) |
+
+
 ![Next.js](https://img.shields.io/badge/Next.js%2015-000000?style=for-the-badge&logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
@@ -22,7 +29,7 @@ Designed with an emphasis on minimalist aesthetics and high-performance data pip
 The project utilizes the Next.js 15 App Router architecture, cleanly separating UI components, BI logic, and simulated data layers.
 
 ```text
-d:\Projects\NEXT\smart-brew\
+.
 ├── src/
 │   ├── app/
 │   │   ├── dashboard/ 
@@ -50,7 +57,7 @@ d:\Projects\NEXT\smart-brew\
 
 ### Pages
 - **`/app/page.tsx` (Landing)**: Serves as the primary touchpoint for data generation. It hosts the product catalog and customer preference forms, acting as the frontend sensor for the BI pipeline.
-- **`/app/dashboard/page.tsx`**: The analytical consumption layer. It securely visualizes the aggregated data metrics using `recharts`, designed for administrative and strategic overview. Features a direct **Export to CSV** function allowing decision-makers to download underlying telemetry data for external spreadsheet analysis.
+- **`/app/dashboard/page.tsx`**: The analytical consumption layer. It securely visualizes the aggregated data metrics using `recharts`, designed for administrative and strategic overview. Crucially, it features a direct **Export to CSV** function, ensuring **Data Portability** and allowing decision-makers to effortlessly download underlying telemetry data for external spreadsheet analysis (e.g., Excel).
 
 ### Core Components
 - **`ProductList` & `ProductCard`**: Implements intersection observers and click handlers to log `VIEW` and `ADD_TO_CART` events. Triggers non-blocking `sonner` notifications.
@@ -63,7 +70,28 @@ The telemetry engine acts as an interceptor. Instead of direct database writes, 
 
 ---
 
+## 🔍 How to Verify the BI Pipeline (Live Demo)
+
+To see the data generation in action without a backend integration:
+1. Open the website and press `F12` (or Right-click > Inspect) to open the **Browser Console**.
+2. Click the **"Add to Cart"** button on any product.
+3. Observe the structured **JSON Payload** appearing in the console with a `[BI DATA INGESTION]` prefix.
+4. Go to the **Customer Form**, fill in the details, and submit.
+5. Notice how the engine flags the "Special Request" field for **NLP processing** if left filled.
+
+---
+
 ## 📊 Business Intelligence & Data Architecture
+
+```mermaid
+graph LR
+    A[User Interaction] -->|Telemetry| B(BI Logger Engine)
+    B -->|Structured Data| C[SQL Star Schema]
+    B -->|Unstructured Data| D[NLP Pipeline Proxy]
+    C --> E[Recharts Dashboard]
+    D --> E
+    E --> F[Decision Support]
+```
 
 This prototype is built on a scalable **Star Schema** logic, anticipating direct integration with data warehouses like Snowflake or Amazon Redshift.
 
@@ -85,10 +113,13 @@ fact_customer_preferences (preference_id UUID, name VARCHAR, coffee_preference E
 ```
 
 ### Insights & Decision Making
-The `/dashboard` provides critical operational insights:
-1. **Popular Products (Bar Chart)**: Drives supply chain decisions and inventory management.
-2. **Preference Distribution (Pie Chart)**: Guides future R&D for new roasts based on the 'Strong' vs 'Smooth' dichotomy.
-3. **Hourly Demand Density (Line Chart)**: Optimizes staff scheduling and identifies peak operational stress points.
+The `/dashboard` provides critical operational and strategic insights:
+1. **KPI Summary Cards**: Real-time monitoring of **Total Revenue**, **Average Order Value**, and **Customer Retention**. Trend indicators highlight growth or contraction periods instantly.
+2. **Weekly Revenue vs Target (Bar Chart)**: Visualizes performance against internal goals, allowing managers to track progress and adjust marketing efforts in real-time.
+3. **Popular Products (Bar Chart)**: Drives supply chain decisions and inventory management based on volume.
+4. **Preference Distribution (Pie Chart)**: Guides future R&D for new roasts based on the 'Strong' vs 'Smooth' dichotomy.
+5. **Hourly Demand Density (Line Chart)**: Optimizes staff scheduling and identifies peak operational stress points.
+6. **Recent Activity (Interaction Table)**: A granular audit trail of live transactions, providing transparency and operational tracking of every ingestion event.
 
 ---
 
@@ -139,6 +170,7 @@ Navigate to `http://localhost:3000` to view the landing page, and `http://localh
 | **Add-to-Cart Volume** | Demand Forecasting | **Inventory Management:** Precise ordering of raw coffee beans and milk to minimize waste. |
 | **Preference (Strong/Milky)** | Customer Segmentation | **Sourcing Strategy:** Shift purchasing budget towards dark roasts or dairy alternatives. |
 | **Interaction Timestamps** | Operational Density | **Staff Scheduling:** Allocate more baristas during peak telemetry hours. |
+| **Revenue vs. Target** | Performance Tracking | **Financial Strategy:** Trigger marketing campaigns if revenue falls below weekly targets. |
 | **Unstructured 'Requests'** | Emerging Trends (NLP) | **Product Innovation:** Launch new seasonal drinks based on recurring keywords (e.g., *Cinnamon*, *Oat*). |
 
 ---
