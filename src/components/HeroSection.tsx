@@ -7,7 +7,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
       <Image 
-        src="/images/hero.png" 
+        src="/images/hero.jpg" 
         alt="Smart Brew Hero" 
         fill 
         sizes="100vw"
@@ -33,9 +33,9 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-5xl md:text-7xl font-light tracking-tight mb-6"
+          className="text-4xl md:text-7xl font-light tracking-tight mb-6 leading-[1.1]"
         >
-          Crafting the perfect cup, <br/>
+          Crafting the perfect cup, <br className="hidden md:block" />
           <span className="italic text-coffee-accent font-serif">optimized by data.</span>
         </motion.h1>
         

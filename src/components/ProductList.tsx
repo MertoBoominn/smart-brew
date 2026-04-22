@@ -12,21 +12,21 @@ const products = [
     name: "Midnight Cold Brew",
     description: "Steeped for 24 hours, delivering a smooth, bold profile with deep chocolate notes.",
     price: "$5.50",
-    image: "/images/cold_brew.png"
+    image: "/images/cold_brew.jpg"
   },
   {
     id: "prod_002",
     name: "Ethiopean Gold",
     description: "Light roast pour-over highlighting bright citrus acidity and floral jasmine aromas.",
     price: "$6.00",
-    image: "/images/ethiopean_gold.png"
+    image: "/images/ethiopean_gold.jpg"
   },
   {
     id: "prod_003",
     name: "Oat Latte",
     description: "Rich espresso balanced beautifully with creamy oat milk and a touch of vanilla.",
     price: "$5.00",
-    image: "/images/oat_latte.png"
+    image: "/images/oat_latte.jpg"
   }
 ];
 
@@ -69,7 +69,7 @@ function ProductCard({ product, index }: { product: typeof products[0], index: n
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, delay: index * 0.2 }}
       onMouseEnter={handleView}
-      className="group relative bg-coffee-card border border-coffee-border rounded-2xl p-8 hover:border-coffee-accent/50 transition-colors duration-500 flex flex-col h-full"
+      className="group relative bg-coffee-card border border-coffee-border rounded-2xl p-6 md:p-8 hover:border-coffee-accent/50 transition-colors duration-500 flex flex-col h-full"
     >
       <div className="relative w-full h-48 mb-6 rounded-xl overflow-hidden bg-[#0f0a07]">
         <Image 

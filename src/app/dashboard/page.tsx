@@ -38,7 +38,7 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-[#0f0a07] text-[#f4ece6]">
       <Navbar />
-      <div className="pt-32 px-4 max-w-7xl mx-auto pb-24">
+      <div className="pt-28 px-2 md:px-8 max-w-7xl mx-auto pb-24">
         
         <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
@@ -117,9 +117,9 @@ export default function Dashboard() {
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6"
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Popular Products</h3>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={popularProductsData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
+                <BarChart data={popularProductsData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="name" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
@@ -153,7 +153,7 @@ export default function Dashboard() {
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6"
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Customer Preference Distribution</h3>
-            <div className="h-[300px] w-full flex items-center justify-center relative">
+            <div className="h-[250px] md:h-[300px] w-full flex items-center justify-center relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip 
@@ -209,9 +209,9 @@ export default function Dashboard() {
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6 lg:col-span-2"
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Hourly Demand Density</h3>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={hourlyDemandData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
+                <LineChart data={hourlyDemandData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d241f" vertical={false} />
                   <XAxis dataKey="time" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
@@ -257,9 +257,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyRevenueData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
+                <BarChart data={weeklyRevenueData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d241f" vertical={false} />
                   <XAxis dataKey="day" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
@@ -291,8 +291,8 @@ export default function Dashboard() {
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6 lg:col-span-2"
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Recent Activity</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="overflow-x-auto -mx-6 px-6">
+              <table className="w-full min-w-[600px] text-left">
                 <thead>
                   <tr className="border-b border-white/5 text-white/40 text-xs uppercase tracking-widest">
                     <th className="pb-4 font-medium">Transaction ID</th>

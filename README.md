@@ -4,9 +4,9 @@
 
 | Landing Page | Product Telemetry |
 | :---: | :---: |
-| ![Landing Page](./images/ss1.png) | ![Product Card](./images/ss2.png) |
+| ![Landing Page](./public/images/ss1.png) | ![Product Card](./public/images/ss2.png) |
 | **BI Analytics Overview** | **Admin Data Control** |
-| ![BI Dashboard](./images/ss3.png) | ![BI Dashboard Export](./images/ss4.png) |
+| ![BI Dashboard](./public/images/ss3.png) | ![BI Dashboard Export](./public/images/ss4.png) |
 
 
 ![Next.js](https://img.shields.io/badge/Next.js%2015-000000?style=for-the-badge&logo=next.js&logoColor=white)

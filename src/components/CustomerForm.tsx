@@ -30,7 +30,7 @@ export function CustomerForm() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 1 }}
-        className="bg-coffee-card border border-coffee-border p-8 md:p-12 rounded-3xl relative overflow-hidden"
+        className="bg-coffee-card border border-coffee-border p-6 md:p-12 rounded-3xl relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-coffee-accent/5 rounded-full blur-[80px] pointer-events-none" />
         
