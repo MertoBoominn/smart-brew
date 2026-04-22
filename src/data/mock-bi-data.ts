@@ -6,9 +6,9 @@ export const popularProductsData = [
 ];
 
 export const customerPreferenceData = [
-  { name: 'Sert', value: 35, color: '#2d241f' },
-  { name: 'Yumuşak', value: 45, color: '#d4a373' },
-  { name: 'Sütlü', value: 20, color: '#f4ece6' },
+  { name: 'Strong', value: 35, color: '#2d241f' },
+  { name: 'Smooth', value: 45, color: '#d4a373' },
+  { name: 'Milky', value: 20, color: '#f4ece6' },
 ];
 
 export const hourlyDemandData = [

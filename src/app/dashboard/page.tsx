@@ -2,6 +2,7 @@
 
 import { Navbar } from "@/components/Navbar";
 import { motion } from "framer-motion";
+import { Download } from "lucide-react";
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie,
@@ -10,27 +11,56 @@ import {
 import { popularProductsData, customerPreferenceData, hourlyDemandData } from "@/data/mock-bi-data";
 
 export default function Dashboard() {
+  const handleExport = () => {
+    // Basic CSV export for popular products as an example
+    const headers = ["Product Name,Sales Volume\n"];
+    const rows = popularProductsData.map(p => `"${p.name}",${p.sales}\n`);
+    const csvContent = headers.join("") + rows.join("");
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "smart_brew_bi_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <main className="min-h-screen bg-[#0f0a07] text-[#f4ece6]">
       <Navbar />
       <div className="pt-32 px-4 max-w-7xl mx-auto pb-24">
         
-        <div className="mb-16">
-          <motion.h1 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-4xl font-light mb-2"
+        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-4xl font-light mb-2"
+            >
+              BI Dashboard
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-white/50 font-light"
+            >
+              Real-time analytics and data visualizations for Smart Brew.
+            </motion.p>
+          </div>
+          
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            onClick={handleExport}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-coffee-card border border-coffee-border hover:border-coffee-accent hover:text-coffee-accent transition-colors rounded-xl text-sm font-medium tracking-wide text-white/70 cursor-pointer"
           >
-            BI Dashboard
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/50 font-light"
-          >
-            Real-time analytics and data visualizations for Smart Brew.
-          </motion.p>
+            <Download className="w-4 h-4" />
+            Export to CSV
+          </motion.button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -45,12 +75,21 @@ export default function Dashboard() {
             <h3 className="text-lg font-medium mb-6 tracking-wide">Popular Products</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={popularProductsData}>
+                <BarChart data={popularProductsData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
                   <XAxis dataKey="name" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
                     cursor={{ fill: 'rgba(212, 163, 115, 0.1)' }}
-                    contentStyle={{ backgroundColor: '#1a1310', border: '1px solid #2d241f', borderRadius: '8px' }}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
+                      border: '1px solid #d4a373', 
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+                      color: '#fff',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                    itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+                    labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
                   <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
                     {popularProductsData.map((entry, index) => (
@@ -74,7 +113,16 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1a1310', border: '1px solid #2d241f', borderRadius: '8px' }}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
+                      border: '1px solid #d4a373', 
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+                      color: '#fff',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                    itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+                    labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
                   <Pie
                     data={customerPreferenceData}
@@ -119,12 +167,21 @@ export default function Dashboard() {
             <h3 className="text-lg font-medium mb-6 tracking-wide">Hourly Demand Density</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={hourlyDemandData}>
+                <LineChart data={hourlyDemandData} margin={{ top: 20, right: 30, left: 10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d241f" vertical={false} />
                   <XAxis dataKey="time" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1a1310', border: '1px solid #2d241f', borderRadius: '8px' }}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
+                      border: '1px solid #d4a373', 
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+                      color: '#fff',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                    itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+                    labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
                   <Line 
                     type="monotone" 

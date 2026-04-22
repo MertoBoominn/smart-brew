@@ -9,7 +9,7 @@ export function CustomerForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    coffee_preference: "Sert" as 'Sert' | 'Yumuşak' | 'Sütlü',
+    coffee_preference: "Strong" as 'Strong' | 'Smooth' | 'Milky',
     special_request: ""
   });
 
@@ -20,7 +20,7 @@ export function CustomerForm() {
     toast.success("Preferences saved!", {
       description: "BI structured/unstructured data logs captured.",
     });
-    setFormData({ name: "", email: "", coffee_preference: "Sert", special_request: "" });
+    setFormData({ name: "", email: "", coffee_preference: "Strong", special_request: "" });
   };
 
   return (
@@ -69,9 +69,9 @@ export function CustomerForm() {
                 value={formData.coffee_preference}
                 onChange={e => setFormData({ ...formData, coffee_preference: e.target.value as any })}
               >
-                <option value="Sert">Sert (Bold & Strong)</option>
-                <option value="Yumuşak">Yumuşak (Smooth & Mellow)</option>
-                <option value="Sütlü">Sütlü (Creamy & Milky)</option>
+                <option value="Strong">Strong (Bold & Strong)</option>
+                <option value="Smooth">Smooth (Smooth & Mellow)</option>
+                <option value="Milky">Milky (Creamy & Milky)</option>
               </select>
             </div>
 
@@ -93,7 +93,7 @@ export function CustomerForm() {
             <div className="pt-6">
               <button 
                 type="submit"
-                className="w-full bg-white text-black py-4 rounded-xl font-medium tracking-wide hover:bg-coffee-accent hover:text-white transition-all duration-300"
+                className="w-full bg-white text-black py-4 rounded-xl font-medium tracking-wide hover:bg-coffee-accent hover:text-white transition-all duration-300 cursor-pointer"
               >
                 SAVE PREFERENCES
               </button>

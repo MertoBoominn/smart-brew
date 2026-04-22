@@ -32,7 +32,7 @@
  *    - preference_id (UUID, Primary Key)
  *    - name (String)
  *    - email (String)
- *    - coffee_preference (Enum: 'Sert', 'Yumuşak', 'Sütlü')
+ *    - coffee_preference (Enum: 'Strong', 'Smooth', 'Milky')
  *    - special_request (Text) -> UNSTRUCTURED DATA (Requires NLP)
  *    - timestamp (Timestamp)
  * 
@@ -64,7 +64,7 @@ export function logInteraction(payload: BIInteractionPayload) {
 export interface BICustomerPreferencePayload {
   name: string;
   email: string;
-  coffee_preference: 'Sert' | 'Yumuşak' | 'Sütlü';
+  coffee_preference: 'Strong' | 'Smooth' | 'Milky';
   special_request?: string; // Unstructured data field
 }
 

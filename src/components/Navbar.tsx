@@ -20,7 +20,7 @@ export function Navbar() {
           </Link>
           <div className="flex gap-6 items-center text-sm font-medium tracking-wider">
             <Link href="/" className="hover:text-coffee-accent transition-colors duration-300">HOME</Link>
-            <Link href="/dashboard" className="flex items-center gap-2 text-coffee-accent bg-coffee-card px-4 py-2 rounded-full hover:bg-coffee-border transition-colors duration-300">
+            <Link href="/dashboard" className="flex items-center gap-2 text-coffee-accent bg-coffee-card px-4 py-2 rounded-full hover:bg-coffee-border transition-colors duration-300 cursor-pointer">
               <BarChart3 className="w-4 h-4" />
               <span>BI DASHBOARD</span>
             </Link>
