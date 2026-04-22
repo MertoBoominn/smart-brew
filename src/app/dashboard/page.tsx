@@ -123,7 +123,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    cursor={{ fill: 'rgba(212, 163, 115, 0.1)' }}
+                    cursor={{ fill: 'rgba(212, 163, 115, 0.05)' }}
                     contentStyle={{ 
                       backgroundColor: 'rgba(26, 19, 16, 0.95)', 
                       border: '1px solid #d4a373', 
@@ -264,6 +264,7 @@ export default function Dashboard() {
                   <XAxis dataKey="day" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
+                    cursor={{ fill: 'rgba(212, 163, 115, 0.05)' }}
                     contentStyle={{ 
                       backgroundColor: 'rgba(26, 19, 16, 0.95)', 
                       border: '1px solid #d4a373', 
