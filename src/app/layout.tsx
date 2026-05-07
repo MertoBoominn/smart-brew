@@ -10,6 +10,7 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -18,6 +19,10 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "@/components/Toaster";
+import { CartProvider } from "@/context/CartContext";
+import { CartDrawer } from "@/components/CartDrawer";
+import { CartIcon } from "@/components/CartIcon";
+import { SuccessModal } from "@/components/SuccessModal";
 
 export default function RootLayout({
   children,
@@ -30,8 +35,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster />
+        <CartProvider>
+          {children}
+          <CartIcon />
+          <CartDrawer />
+          <SuccessModal />
+          <Toaster />
+        </CartProvider>
       </body>
     </html>
   );

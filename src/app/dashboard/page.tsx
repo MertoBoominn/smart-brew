@@ -9,20 +9,33 @@ import {
   LineChart, Line, CartesianGrid
 } from 'recharts';
 import { 
-  popularProductsData, 
   customerPreferenceData, 
   hourlyDemandData,
-  kpiData,
-  weeklyRevenueData,
-  recentTransactionsData
 } from "@/data/mock-bi-data";
-import { TrendingUp, TrendingDown, Minus, Coffee, Users, DollarSign, Clock } from "lucide-react";
+import { getBIState, subscribeBIStore } from "@/lib/bi-store";
+import { TrendingUp, TrendingDown, Minus, Coffee, Users, DollarSign, Clock, ShoppingCart } from "lucide-react";
+import { useState, useEffect, useSyncExternalStore, useCallback } from "react";
+
+// Hook to subscribe to the reactive BI store
+function useBIStore() {
+  const subscribe = useCallback((cb: () => void) => subscribeBIStore(cb), []);
+  const getSnapshot = useCallback(() => getBIState(), []);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
 
 export default function Dashboard() {
+  const biState = useBIStore();
+  // Force re-render key when BI state changes (for recharts to pick up mutations)
+  const [renderKey, setRenderKey] = useState(0);
+
+  useEffect(() => {
+    const unsub = subscribeBIStore(() => setRenderKey(k => k + 1));
+    return unsub;
+  }, []);
+
   const handleExport = () => {
-    // Basic CSV export for popular products as an example
     const headers = ["Product Name,Sales Volume\n"];
-    const rows = popularProductsData.map(p => `"${p.name}",${p.sales}\n`);
+    const rows = biState.popularProducts.map(p => `"${p.name}",${p.sales}\n`);
     const csvContent = headers.join("") + rows.join("");
     
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -34,6 +47,8 @@ export default function Dashboard() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const kpiIcons = [DollarSign, ShoppingCart, Users, Clock];
 
   return (
     <main className="min-h-screen bg-[#0f0a07] text-[#f4ece6]">
@@ -71,72 +86,70 @@ export default function Dashboard() {
           </motion.button>
         </div>
 
-        {/* KPI Section */}
+        {/* KPI Section — uses reactive biState */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {kpiData.map((kpi, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              className="bg-coffee-card border border-coffee-border p-6 rounded-2xl relative overflow-hidden group hover:border-coffee-accent/50 transition-colors"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-white/40 text-xs uppercase tracking-widest font-medium">{kpi.label}</span>
-                <div className="p-2 rounded-lg bg-white/5">
-                  {index === 0 && <DollarSign className="w-4 h-4 text-coffee-accent" />}
-                  {index === 1 && <Coffee className="w-4 h-4 text-coffee-accent" />}
-                  {index === 2 && <Users className="w-4 h-4 text-coffee-accent" />}
-                  {index === 3 && <Clock className="w-4 h-4 text-coffee-accent" />}
+          {biState.kpiData.map((kpi, index) => {
+            const Icon = kpiIcons[index] || Coffee;
+            return (
+              <motion.div
+                key={`${index}-${renderKey}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
+                className="bg-coffee-card border border-coffee-border p-6 rounded-2xl relative overflow-hidden group hover:border-coffee-accent/50 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-white/40 text-xs uppercase tracking-widest font-medium">{kpi.label}</span>
+                  <div className="p-2 rounded-lg bg-white/5">
+                    <Icon className="w-4 h-4 text-coffee-accent" />
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-end gap-3">
-                <h2 className="text-3xl font-light">{kpi.value}</h2>
-                <div className={`flex items-center gap-1 text-xs mb-1 ${
-                  kpi.trend === 'up' ? 'text-emerald-400' : 
-                  kpi.trend === 'down' ? 'text-rose-400' : 'text-white/40'
-                }`}>
-                  {kpi.trend === 'up' && <TrendingUp className="w-3 h-3" />}
-                  {kpi.trend === 'down' && <TrendingDown className="w-3 h-3" />}
-                  {kpi.trend === 'neutral' && <Minus className="w-3 h-3" />}
-                  {kpi.change}
+                <div className="flex items-end gap-3">
+                  <h2 className="text-3xl font-light">{kpi.value}</h2>
+                  <div className={`flex items-center gap-1 text-xs mb-1 ${
+                    kpi.trend === 'up' ? 'text-emerald-400' : 
+                    kpi.trend === 'down' ? 'text-rose-400' : 'text-white/40'
+                  }`}>
+                    {kpi.trend === 'up' && <TrendingUp className="w-3 h-3" />}
+                    {kpi.trend === 'down' && <TrendingDown className="w-3 h-3" />}
+                    {kpi.trend === 'neutral' && <Minus className="w-3 h-3" />}
+                    {kpi.change}
+                  </div>
                 </div>
-              </div>
-              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-coffee-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </motion.div>
-          ))}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-coffee-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Chart 1: Bar Chart */}
+          {/* Chart 1: Popular Products — REACTIVE */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6"
           >
-            <h3 className="text-lg font-medium mb-6 tracking-wide">Popular Products</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium tracking-wide">Popular Products</h3>
+              {biState.purchaseCompletedCount > 0 && (
+                <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full animate-pulse">LIVE</span>
+              )}
+            </div>
             <div className="h-[250px] md:h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={popularProductsData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart key={`pop-${renderKey}`} data={biState.popularProducts} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="name" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
                     cursor={{ fill: 'rgba(212, 163, 115, 0.05)' }}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
-                      border: '1px solid #d4a373', 
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                      color: '#fff',
-                      backdropFilter: 'blur(8px)'
-                    }}
+                    contentStyle={{ backgroundColor: 'rgba(26, 19, 16, 0.95)', border: '1px solid #d4a373', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', color: '#fff', backdropFilter: 'blur(8px)' }}
                     itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
                     labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
                   <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
-                    {popularProductsData.map((entry, index) => (
+                    {biState.popularProducts.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={index === 2 ? '#d4a373' : '#2d241f'} />
                     ))}
                   </Bar>
@@ -145,7 +158,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Chart 2: Pie Chart */}
+          {/* Chart 2: Pie Chart (static preferences) */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -154,30 +167,14 @@ export default function Dashboard() {
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Customer Preference Distribution</h3>
             <div className="h-[250px] md:h-[300px] w-full flex items-center justify-center relative">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
-                      border: '1px solid #d4a373', 
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                      color: '#fff',
-                      backdropFilter: 'blur(8px)'
-                    }}
+                    contentStyle={{ backgroundColor: 'rgba(26, 19, 16, 0.95)', border: '1px solid #d4a373', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', color: '#fff', backdropFilter: 'blur(8px)' }}
                     itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
                     labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
-                  <Pie
-                    data={customerPreferenceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
+                  <Pie data={customerPreferenceData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
                     {customerPreferenceData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
@@ -201,7 +198,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Chart 3: Line Chart */}
+          {/* Chart 3: Hourly Demand (static) */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -210,36 +207,23 @@ export default function Dashboard() {
           >
             <h3 className="text-lg font-medium mb-6 tracking-wide">Hourly Demand Density</h3>
             <div className="h-[250px] md:h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={hourlyDemandData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d241f" vertical={false} />
                   <XAxis dataKey="time" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
-                      border: '1px solid #d4a373', 
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                      color: '#fff',
-                      backdropFilter: 'blur(8px)'
-                    }}
+                    contentStyle={{ backgroundColor: 'rgba(26, 19, 16, 0.95)', border: '1px solid #d4a373', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', color: '#fff', backdropFilter: 'blur(8px)' }}
                     itemStyle={{ color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
                     labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="orders" 
-                    stroke="#d4a373" 
-                    strokeWidth={3}
-                    dot={{ fill: '#1a1310', stroke: '#d4a373', strokeWidth: 2, r: 6 }}
-                    activeDot={{ r: 8, fill: '#d4a373', stroke: '#fff' }}
-                  />
+                  <Line type="monotone" dataKey="orders" stroke="#d4a373" strokeWidth={3} dot={{ fill: '#1a1310', stroke: '#d4a373', strokeWidth: 2, r: 6 }} activeDot={{ r: 8, fill: '#d4a373', stroke: '#fff' }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </motion.div>
-          {/* Chart 4: Weekly Revenue vs Target */}
+
+          {/* Chart 4: Weekly Revenue vs Target — REACTIVE */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,7 +231,12 @@ export default function Dashboard() {
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6 lg:col-span-2"
           >
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-lg font-medium tracking-wide">Weekly Revenue vs Target</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-medium tracking-wide">Weekly Revenue vs Target</h3>
+                {biState.purchaseCompletedCount > 0 && (
+                  <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full animate-pulse">LIVE</span>
+                )}
+              </div>
               <div className="flex gap-4">
                 <div className="flex items-center gap-2 text-xs text-white/40">
                   <span className="w-3 h-3 rounded-sm bg-coffee-accent" /> Revenue
@@ -258,21 +247,14 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="h-[250px] md:h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyRevenueData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart key={`rev-${renderKey}`} data={biState.weeklyRevenue} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2d241f" vertical={false} />
                   <XAxis dataKey="day" stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#f4ece6" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
                     cursor={{ fill: 'rgba(212, 163, 115, 0.05)' }}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(26, 19, 16, 0.95)', 
-                      border: '1px solid #d4a373', 
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                      color: '#fff',
-                      backdropFilter: 'blur(8px)'
-                    }}
+                    contentStyle={{ backgroundColor: 'rgba(26, 19, 16, 0.95)', border: '1px solid #d4a373', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', color: '#fff', backdropFilter: 'blur(8px)' }}
                     itemStyle={{ color: '#fff' }}
                     labelStyle={{ color: '#d4a373', marginBottom: '4px', fontWeight: '600' }}
                   />
@@ -283,14 +265,19 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Recent Activity Section */}
+          {/* Recent Activity — REACTIVE */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             className="bg-coffee-card border border-coffee-border rounded-2xl p-6 lg:col-span-2"
           >
-            <h3 className="text-lg font-medium mb-6 tracking-wide">Recent Activity</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium tracking-wide">Recent Activity</h3>
+              {biState.purchaseCompletedCount > 0 && (
+                <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full animate-pulse">LIVE</span>
+              )}
+            </div>
             <div className="overflow-x-auto -mx-6 px-6">
               <table className="w-full min-w-[600px] text-left">
                 <thead>
@@ -304,8 +291,8 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {recentTransactionsData.map((tx, i) => (
-                    <tr key={i} className="border-b border-white/5 last:border-0 group hover:bg-white/[0.02] transition-colors">
+                  {biState.recentTransactions.map((tx, i) => (
+                    <tr key={`${tx.id}-${renderKey}`} className="border-b border-white/5 last:border-0 group hover:bg-white/[0.02] transition-colors">
                       <td className="py-4 text-coffee-accent font-mono">{tx.id}</td>
                       <td className="py-4 font-light">{tx.customer}</td>
                       <td className="py-4 font-light text-white/70">{tx.product}</td>
@@ -325,6 +312,34 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
+          {/* NEW: Cart Analytics Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-coffee-card border border-coffee-border rounded-2xl p-6 lg:col-span-2"
+          >
+            <h3 className="text-lg font-medium mb-6 tracking-wide">Cart Analytics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="text-white/40 text-xs uppercase tracking-widest">Add-to-Cart Events</span>
+                <p className="text-2xl font-light mt-2">{biState.addToCartCount}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="text-white/40 text-xs uppercase tracking-widest">Purchases Completed</span>
+                <p className="text-2xl font-light mt-2">{biState.purchaseCompletedCount}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="text-white/40 text-xs uppercase tracking-widest">Cart Abandonment Rate</span>
+                <p className="text-2xl font-light mt-2">
+                  {biState.addToCartCount > 0
+                    ? `${(Math.max(0, (biState.addToCartCount - biState.purchaseCompletedCount) / biState.addToCartCount * 100)).toFixed(1)}%`
+                    : "—"}
+                </p>
+              </div>
+            </div>
+            <p className="text-white/20 text-xs mt-4 italic">📊 Cart abandonment is computed in real-time: (ADD_TO_CART − PURCHASE_COMPLETED) / ADD_TO_CART</p>
+          </motion.div>
 
         </div>
       </div>

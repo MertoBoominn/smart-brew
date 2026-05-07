@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import { logInteraction } from "@/lib/bi-logger";
+import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import { useState } from "react";
 import Image from "next/image";
 
 const products = [
@@ -11,21 +13,24 @@ const products = [
     id: "prod_001",
     name: "Midnight Cold Brew",
     description: "Steeped for 24 hours, delivering a smooth, bold profile with deep chocolate notes.",
-    price: "$5.50",
+    price: 5.50,
+    priceLabel: "$5.50",
     image: "/images/cold_brew.jpg"
   },
   {
     id: "prod_002",
     name: "Ethiopean Gold",
     description: "Light roast pour-over highlighting bright citrus acidity and floral jasmine aromas.",
-    price: "$6.00",
+    price: 6.00,
+    priceLabel: "$6.00",
     image: "/images/ethiopean_gold.jpg"
   },
   {
     id: "prod_003",
     name: "Oat Latte",
     description: "Rich espresso balanced beautifully with creamy oat milk and a touch of vanilla.",
-    price: "$5.00",
+    price: 5.00,
+    priceLabel: "$5.00",
     image: "/images/oat_latte.jpg"
   }
 ];
@@ -43,15 +48,30 @@ export function ProductList() {
 }
 
 function ProductCard({ product, index }: { product: typeof products[0], index: number }) {
+  const { addItem } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
+
   const handleAddToCart = () => {
     // 📊 BI TRIGGER: Logging ADD_TO_CART interaction
     logInteraction({
       product_id: product.id,
       interaction_type: "ADD_TO_CART"
     });
+
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+
     toast.success(`${product.name} added to cart!`, {
       description: "BI interaction logged successfully.",
     });
+
+    // Brief visual feedback
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1200);
   };
 
   const handleView = () => {
@@ -85,13 +105,17 @@ function ProductCard({ product, index }: { product: typeof products[0], index: n
         <p className="text-white/50 font-light leading-relaxed mb-8">{product.description}</p>
       </div>
       <div className="flex items-center justify-between mt-auto">
-        <span className="text-xl font-serif text-coffee-accent">{product.price}</span>
+        <span className="text-xl font-serif text-coffee-accent">{product.priceLabel}</span>
         <button 
           onClick={handleAddToCart}
-          className="w-12 h-12 rounded-full border border-coffee-border flex items-center justify-center text-white/70 hover:text-coffee-accent hover:border-coffee-accent hover:bg-coffee-accent/10 transition-all duration-300 group-hover:scale-105 cursor-pointer"
+          className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-300 group-hover:scale-105 cursor-pointer ${
+            justAdded
+              ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
+              : "border-coffee-border text-white/70 hover:text-coffee-accent hover:border-coffee-accent hover:bg-coffee-accent/10"
+          }`}
           aria-label={`Add ${product.name} to cart`}
         >
-          <Plus className="w-5 h-5" />
+          {justAdded ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
         </button>
       </div>
     </motion.div>

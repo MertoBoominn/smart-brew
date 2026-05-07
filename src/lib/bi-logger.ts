@@ -24,7 +24,7 @@
  *    - interaction_id (UUID, Primary Key)
  *    - user_id (UUID, Foreign Key -> dim_users)
  *    - product_id (String, Foreign Key -> dim_products)
- *    - interaction_type (Enum: 'VIEW', 'CLICK', 'ADD_TO_CART')
+ *    - interaction_type (Enum: 'VIEW', 'CLICK', 'ADD_TO_CART', 'PURCHASE_COMPLETED')
  *    - timestamp (Timestamp)
  *    - user_agent (String)
  * 
@@ -36,13 +36,35 @@
  *    - special_request (Text) -> UNSTRUCTURED DATA (Requires NLP)
  *    - timestamp (Timestamp)
  * 
+ * 5. Fact Table: fact_purchases
+ *    - purchase_id (UUID, Primary Key)
+ *    - user_id (UUID, Foreign Key -> dim_users)
+ *    - total_value (Decimal)
+ *    - item_count (Integer)
+ *    - items (JSON) -> Denormalized for quick BI queries
+ *    - timestamp (Timestamp)
+ * 
+ * 6. Analytics Metric: Cart Abandonment Rate
+ *    - Computed as: (ADD_TO_CART events - PURCHASE_COMPLETED events) / ADD_TO_CART events
+ *    - Tracked in-session via bi-store.ts
+ * 
  * ============================================================================
  */
 
 // Simulating a unique user/session ID for demonstration
 const MOCK_USER_ID = "usr_" + Math.random().toString(36).substring(2, 9);
 
-export type InteractionType = 'VIEW' | 'CLICK' | 'ADD_TO_CART';
+function sendToServerLog(message: string, payload?: any, level: 'info' | 'warn' | 'error' = 'info') {
+  if (typeof window !== 'undefined') {
+    fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, payload, level }),
+    }).catch(err => console.error("Failed to send log to server", err));
+  }
+}
+
+export type InteractionType = 'VIEW' | 'CLICK' | 'ADD_TO_CART' | 'PURCHASE_COMPLETED';
 
 export interface BIInteractionPayload {
   product_id: string;
@@ -59,6 +81,57 @@ export function logInteraction(payload: BIInteractionPayload) {
 
   // BI Visualization: Logging to console to demonstrate data generation
   console.log("%c[BI DATA INGESTION] Interaction Logged:", "color: #d4a373; font-weight: bold", JSON.stringify(logEntry, null, 2));
+  sendToServerLog("[BI DATA INGESTION] Interaction Logged:", logEntry);
+}
+
+/**
+ * Logs an ADD_TO_CART event for a specific product.
+ * Used for both interaction tracking and cart abandonment rate calculation.
+ */
+export function logAddToCart(productId: string, productName: string) {
+  logInteraction({ product_id: productId, interaction_type: 'ADD_TO_CART' });
+  console.log(
+    "%c[BI CART ANALYTICS] Item added:",
+    "color: #22c55e; font-weight: bold",
+    `${productName} (${productId})`
+  );
+  sendToServerLog("[BI CART ANALYTICS] Item added:", { productName, productId });
+}
+
+/**
+ * Logs a PURCHASE_COMPLETED event with full order details.
+ * This is the key telemetry event for revenue analytics.
+ */
+export function logPurchase(
+  items: Array<{ id: string; name: string; price: number; quantity: number }>,
+  totalValue: number
+) {
+  const logEntry = {
+    event: 'PURCHASE_COMPLETED',
+    user_id: MOCK_USER_ID,
+    total_value: totalValue,
+    item_count: items.reduce((sum, i) => sum + i.quantity, 0),
+    items: items.map(i => ({
+      product_id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      unit_price: i.price,
+      subtotal: i.price * i.quantity,
+    })),
+    timestamp: new Date().toISOString(),
+  };
+
+  console.log(
+    "%c[BI DATA INGESTION] 🎉 PURCHASE_COMPLETED:",
+    "color: #d4a373; font-weight: bold; font-size: 14px",
+    JSON.stringify(logEntry, null, 2)
+  );
+  sendToServerLog("[BI DATA INGESTION] 🎉 PURCHASE_COMPLETED:", logEntry);
+
+  // Log each item as an individual interaction for granular tracking
+  items.forEach(item => {
+    logInteraction({ product_id: item.id, interaction_type: 'PURCHASE_COMPLETED' });
+  });
 }
 
 export interface BICustomerPreferencePayload {
@@ -79,8 +152,10 @@ export function logCustomerPreference(payload: BICustomerPreferencePayload) {
   };
 
   console.log("%c[BI DATA INGESTION] Customer Form Logged:", "color: #3b82f6; font-weight: bold", JSON.stringify(logEntry, null, 2));
+  sendToServerLog("[BI DATA INGESTION] Customer Form Logged:", logEntry);
   
   if (logEntry._metadata.nlp_processing_required) {
     console.warn("[BI NLP PIPELINE] Unstructured data detected in 'special_request'. Routing to NLP queue for sentiment and keyword analysis.");
+    sendToServerLog("[BI NLP PIPELINE] Unstructured data detected in 'special_request'. Routing to NLP queue for sentiment and keyword analysis.", undefined, "warn");
   }
 }

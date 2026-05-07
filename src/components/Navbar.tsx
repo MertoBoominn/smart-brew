@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Coffee, BarChart3 } from "lucide-react";
+import { Coffee, BarChart3, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCart } from "@/context/CartContext";
 
 export function Navbar() {
+  const { totalItems, openDrawer } = useCart();
+
   return (
     <motion.nav 
       initial={{ opacity: 0, y: -20 }}
@@ -24,10 +27,34 @@ export function Navbar() {
               <BarChart3 className="w-4 h-4" />
               <span>BI DASHBOARD</span>
             </Link>
+            <button
+              onClick={openDrawer}
+              className="relative p-2 text-white/70 hover:text-coffee-accent transition-colors duration-300 cursor-pointer"
+              aria-label="Open cart"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-coffee-accent text-[9px] font-bold flex items-center justify-center text-[#0f0a07]">
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Mobile Navigation */}
           <div className="flex md:hidden gap-3 items-center">
+            <button
+              onClick={openDrawer}
+              className="relative p-2 text-white/70 hover:text-coffee-accent transition-colors duration-300 cursor-pointer"
+              aria-label="Open cart"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-coffee-accent text-[9px] font-bold flex items-center justify-center text-[#0f0a07]">
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </button>
             <Link href="/dashboard" className="p-2 text-coffee-accent bg-coffee-card rounded-full border border-coffee-border" aria-label="Dashboard">
               <BarChart3 className="w-5 h-5" />
             </Link>
